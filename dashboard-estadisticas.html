@@ -229,7 +229,7 @@ function buildMonths(weeks) {
       const dow = dayOfWeek(d._date);
       for (let li = 0; li < w.locations.length; li++) {
         const x = d['l'+li]; if (!x) continue;
-        allDayData.push({ dow, loc: w.locations[li], a: x.a||0, v: x.v||0, t: x.t });
+        allDayData.push({ dow, loc: w.locations[li], a: x.a||0, v: x.v||0, t: x.t, _date: d._date });
       }
     }
   }
@@ -303,14 +303,26 @@ const fs = (n) => { if (n===null||isNaN(n)) return '—'; if (n>=1e6) return (n/
 const fse = (n) => { if (n===null||isNaN(n)) return '—'; if (n>=1e6) return (n/1e6).toFixed(1)+'M €'; if (n>=1e3) return (n/1e3).toFixed(1)+'K €'; return n.toFixed(0)+' €'; };
 const fp = (n) => (n===null||isNaN(n))?'—':n.toFixed(2)+'%';
 const pct = (c, p) => (p===null||isNaN(p)||c===null||isNaN(c)||p===0)?null:((c-p)/Math.abs(p))*100;
-const targetPct = (val, target) => target ? Math.min(100, (val/target)*100) : 0;
+function targetPct(val, target) { return target ? Math.min(100, (val/target)*100) : 0; }
 const sum = (arr) => arr.reduce((a,b)=>a+(b||0),0);
 const avg = (arr) => { const v = arr.filter(x => x !== null && !isNaN(x)); return v.length ? sum(v)/v.length : 0; };
 
 function getTarget(locName) {
-  // Fuzzy match
   for (const [k, v] of Object.entries(TARGETS)) if (locName.toUpperCase().includes(k)) return v;
   return null;
+}
+
+function daysInMonth(y,m) { return new Date(y, m, 0).getDate(); }
+
+function getPropTarget(locName, mk) {
+  const full = getTarget(locName);
+  if (!full || mk === '_all') return full;
+  const [yy, mm] = mk.split('-').map(Number);
+  const total = daysInMonth(yy, mm);
+  const dates = new Set();
+  for (const w of (months[mk] ? months[mk].weeks : []))
+    for (const d of w.days) { const p = d._date.split('/'); if (+p[1]===mm && +p[2]===yy) dates.add(d._date); }
+  return full * Math.min(1, dates.size / total);
 }
 
 // ============================================================
@@ -349,9 +361,9 @@ function render() {
   const subUni = isAll ? '<span style="color:var(--text-secondary)">Total acumulado</span>' : (prevMonth ? chg(t.unidades, prevMonth.totals.unidades) : '');
   const subTra = isAll ? '<span style="color:var(--text-secondary)">Total acumulado</span>' : (prevMonth ? chg(t.transacciones, prevMonth.totals.transacciones) : '');
 
-  // Calculate total target progress
+  // Calculate total target progress (proportional to days with data)
   let totalTarget = 0, totalVentas = t.ventas || 0;
-  for (const ln of locNames) { const tr = getTarget(ln); if (tr) totalTarget += tr; }
+  for (const ln of locNames) { const tr = getPropTarget(ln, mk); if (tr) totalTarget += tr; }
   const targetPr = targetPct(totalVentas, totalTarget);
 
   document.getElementById('kpiGrid').innerHTML =
@@ -477,7 +489,7 @@ function render() {
   renderWeekdayChart(month, isAll);
 
   // ---- Table ----
-  renderTable(month, label, locNames, ranked, topLoc, flopLoc, totalTarget, totalVentas);
+  renderTable(month, label, locNames, ranked, topLoc, flopLoc, totalTarget, totalVentas, mk);
 }
 
 // ============================================================
@@ -489,27 +501,19 @@ function renderWeekdayChart(month, isAll) {
   const dowData = {};
   for (let d = 0; d < 7; d++) dowData[d] = { a: [], v: [], t: [] };
 
-  // If a specific month is selected, filter by that month's dates
   if (!isAll) {
-    const monthDates = new Set();
-    for (const w of month.weeks) for (const d of w.days) monthDates.add(d._date);
+    // Filter allDayData by month key
+    const [yy, mm] = selectedMonth.split('-').map(Number);
     for (const dd of allDayData) {
-      if (monthDates.has(dd._date)) continue; // skip, we need to filter differently
-    }
-    // Recompute from month data
-    for (const w of month.weeks) {
-      for (const d of w.days) {
-        const dow = dayOfWeek(d._date);
-        for (let li = 0; li < w.locations.length; li++) {
-          const x = d['l'+li]; if (!x) continue;
-          dowData[dow].a.push(x.a||0);
-          dowData[dow].v.push(x.v||0);
-          if (x.t !== null) dowData[dow].t.push(x.t);
-        }
+      if (!dd._date) continue;
+      const [d, m, y] = dd._date.split('/').map(Number);
+      if (y === yy && m === mm) {
+        dowData[dd.dow].a.push(dd.a);
+        dowData[dd.dow].v.push(dd.v);
+        if (dd.t !== null) dowData[dd.dow].t.push(dd.t);
       }
     }
   } else {
-    // Use all data
     for (const dd of allDayData) {
       dowData[dd.dow].a.push(dd.a);
       dowData[dd.dow].v.push(dd.v);
@@ -544,7 +548,7 @@ function renderWeekdayChart(month, isAll) {
 // ============================================================
 // TABLE
 // ============================================================
-function renderTable(month, label, locNames, ranked, topLoc, flopLoc, totalTarget, totalVentas) {
+function renderTable(month, label, locNames, ranked, topLoc, flopLoc, totalTarget, totalVentas, mk) {
   document.getElementById('tableBadge').textContent = label;
   let html = '<table><thead><tr>'+
     '<th>Localidad</th><th class="text-right">Accesos</th><th class="text-right">Ventas</th><th class="text-right">Objetivo</th><th class="text-right">% Obj.</th>'+
@@ -552,7 +556,7 @@ function renderTable(month, label, locNames, ranked, topLoc, flopLoc, totalTarge
   '</tr></thead><tbody>';
   locNames.forEach((l, i) => {
     const d = month.locData[l];
-    const target = getTarget(l);
+    const target = getPropTarget(l, mk);
     const pctTarget = targetPct(d.ventas, target);
     const rank = ranked.findIndex(r => r.name === l) + 1;
     const isTop = l === topLoc;
