@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Executive Dashboard — Estadísticas Acceso</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f1f4f9;
+  --surface:#fff;
+  --border:#e4e7ed;
+  --text:#161b22;
+  --text-secondary:#5c6570;
+  --primary:#2563eb;
+  --primary-light:#eef4ff;
+  --green:#059669;
+  --green-bg:#ecfdf5;
+  --red:#dc2626;
+  --red-bg:#fef2f2;
+  --orange:#d97706;
+  --purple:#7c3aed;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --radius:12px;
+  --radius-sm:8px;
+  --font:'Inter',-apple-system,sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);padding:24px;min-height:100vh}
+.dashboard{max-width:1360px;margin:0 auto}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.header-left h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
+.header-left .sub{font-size:13px;color:var(--text-secondary);margin-top:2px}
+.header-right{display:flex;align-items:center;gap:14px;font-size:13px;color:var(--text-secondary)}
+.refresh-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:13px;font-weight:500;color:var(--text);transition:all .12s}
+.refresh-btn:hover{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+.refresh-btn:disabled{opacity:.5;cursor:wait}
+.refresh-btn .spinner{display:none;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .6s linear infinite}
+.refresh-btn.loading .spinner{display:inline-block}
+.refresh-btn.loading .label{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.month-bar{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;background:var(--surface);padding:6px;border-radius:var(--radius-sm);box-shadow:var(--shadow);border:1px solid var(--border)}
+.month-btn{padding:8px 18px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-secondary);background:transparent;transition:all .12s}
+.month-btn:hover{background:var(--bg);color:var(--text)}
+.month-btn.active{background:var(--primary);color:#fff;box-shadow:0 1px 3px rgba(37,99,235,.3)}
+.month-btn.all-btn{background:var(--surface);border:1.5px dashed var(--border)}
+.month-btn.all-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:14px;margin-bottom:24px}
+.kpi-card{background:var(--surface);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.kpi-card .kpi-label{font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.kpi-card .kpi-value{font-size:26px;font-weight:700;line-height:1.2}
+.kpi-card .kpi-sub{display:flex;align-items:center;gap:6px;font-size:13px;margin-top:5px}
+.kpi-card .kpi-sub .up{color:var(--green)}
+.kpi-card .kpi-sub .down{color:var(--red)}
+.kpi-period-tag{font-size:11px;color:var(--text-secondary);font-weight:400}
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:18px;margin-bottom:18px}
+.chart-card{background:var(--surface);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.chart-card h3{font-size:14px;font-weight:600;margin-bottom:14px;color:var(--text);display:flex;align-items:center;gap:8px}
+.chart-card h3 .badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:10px;background:var(--primary-light);color:var(--primary)}
+.chart-wrap{position:relative;height:280px}
+.chart-wrap.tall{height:340px}
+.chart-wrap canvas{max-width:100%;max-height:100%}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--bg);padding:9px 11px;text-align:left;font-weight:600;border-bottom:2px solid var(--border);white-space:nowrap}
+tbody td{padding:8px 11px;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr:hover{background:#f8faff}
+tbody tr.total-row{font-weight:600;background:var(--primary-light)}
+.text-right{text-align:right}
+.loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 20px;color:var(--text-secondary)}
+.loading-state .spinner-lg{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .6s linear infinite;margin-bottom:14px}
+.loading-state p{font-size:14px}
+.error-state{background:#fef2f2;border:1px solid #fecaca;border-radius:var(--radius);padding:18px 22px;color:var(--red);margin-bottom:18px;font-size:13px}
+@media(max-width:768px){
+  body{padding:12px}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .chart-grid{grid-template-columns:1fr}
+  .chart-wrap{height:220px}
+  .month-bar{overflow-x:auto;flex-wrap:nowrap}
+  .month-btn{white-space:nowrap}
+}
+@media(max-width:480px){.kpi-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="dashboard" id="app">
+  <div class="header">
+    <div class="header-left">
+      <h1>Executive Dashboard</h1>
+      <div class="sub">Accesos · Ventas · Conversión · Unidades · Transacciones</div>
+    </div>
+    <div class="header-right">
+      <span id="lastUpdate">—</span>
+      <button class="refresh-btn" id="refreshBtn" onclick="loadData()">
+        <span class="spinner"></span><span class="label">⟳ Actualizar</span>
+      </button>
+    </div>
+  </div>
+  <div class="error-state" id="errorMsg" style="display:none"></div>
+  <div class="loading-state" id="loadingState">
+    <div class="spinner-lg"></div>
+    <p>Conectando con Google Sheets…</p>
+  </div>
+  <div id="dashboardContent" style="display:none">
+    <div class="month-bar" id="monthBar"></div>
+    <div class="kpi-grid" id="kpiGrid"></div>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3>Evolución Mensual <span class="badge">Total</span></h3>
+        <div class="chart-wrap tall"><canvas id="chartMonthly"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Por Localidad <span class="badge" id="locBadge">—</span></h3>
+        <div class="chart-wrap"><canvas id="chartLoc"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Conversión por Localidad <span class="badge" id="convBadge">—</span></h3>
+        <div class="chart-wrap"><canvas id="chartConv"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Tendencia por Semana <span class="badge" id="weeklyBadge">—</span></h3>
+        <div class="chart-wrap"><canvas id="chartWeekly"></canvas></div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Resumen por Localidad <span class="badge" id="tableBadge">—</span></h3>
+      <div class="table-wrap" id="monthlyTableWrap"></div>
+    </div>
+  </div>
+</div>
+<script>
+// ===== CONFIG =====
+const CSV_URL = '/api/csv';
+const LOC_COLORS = ['#2563eb','#059669','#d97706','#7c3aed','#dc2626'];
+const LOC_NAMES = ['ESTAFETA 41 (Toros)','ESTAFETA 76','ZARAGOZA','DONOSTI','BILBAO'];
+const MES = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+// ===== STATE =====
+let weekData = [], months = {}, monthKeys = [], selectedMonth = null, charts = {};
+// ===== CSV PARSE =====
+function parseCSV(text) {
+  const rows = []; let cur = [], f = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (i+1<text.length&&text[i+1]==='"') { f+='"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { cur.push(f.trim()); f = ''; }
+    else if (c === '\n'||c==='\r') {
+      if (c==='\r'&&i+1<text.length&&text[i+1]==='\n') i++;
+      if (f.trim()||cur.length) cur.push(f.trim()); f = '';
+      if (cur.length&&cur.some(x=>x!=='')) rows.push(cur); cur = [];
+    } else f += c;
+  }
+  if (f.trim()||cur.length) cur.push(f.trim());
+  if (cur.length&&cur.some(x=>x!=='')) rows.push(cur);
+  return rows;
+}
+function num(s) {
+  if (!s||s===''||s==='#DIV/0!'||s==='#REF!'||s==='#N/A') return null;
+  let n = String(s).trim().replace('€','').replace('$','').trim().replace(/\./g,'').replace(',','.');
+  const v = parseFloat(n); return isNaN(v) ? null : v;
+}
+function parseData(rows) {
+  const weeks = []; let curWeek = null, locs = [];
+  for (let r = 0; r < rows.length; r++) {
+    const row = rows[r], first = String(row[0]||'').trim();
+    if (first === 'FECHA') {
+      if (curWeek && curWeek.days.length) weeks.push(curWeek);
+      locs = [];
+      for (let i = 1; i < row.length; i += 5) { const n = String(row[i]||'').trim(); if (n && n !== 'FECHA') locs.push(n); }
+      curWeek = { locations: [...locs], days: [] }; continue;
+    }
+    if (first === '' && String(row[1]||'').trim() === 'Accesos') continue;
+    if (!first && row.every(c => c === '')) continue;
+    if (first === 'Total Semana') {
+      if (curWeek && curWeek.days.length) weeks.push(curWeek);
+      curWeek = { locations: [...locs], days: [] }; continue;
+    }
+    if (curWeek && first) {
+      const parts = first.split('/');
+      if (parts.length === 3) {
+        const dd = {};
+        for (let li = 0; li < curWeek.locations.length && 1+li*5+4 < row.length; li++) {
+          dd['l'+li] = { a: num(row[1+li*5]), v: num(row[2+li*5]), t: num(row[3+li*5]), u: num(row[4+li*5]), r: num(row[5+li*5]) };
+        }
+        dd._date = first; curWeek.days.push(dd);
+      }
+    }
+  }
+  if (curWeek && curWeek.days.length) weeks.push(curWeek);
+  for (const w of weeks) w.locations = w.locations.map(n => { for (const k of LOC_NAMES) if (n.includes(k)) return k; return n; });
+  for (const w of weeks) { const s = new Set(); for (let i = 0; i < w.locations.length; i++) { if (s.has(w.locations[i])) w.locations[i] += ' (2)'; s.add(w.locations[i]); } }
+  return weeks;
+}
+// ===== AGGREGATE =====
+function mkKey(d) { const p = d.split('/'); return p[2]+'-'+String(p[1]).padStart(2,'0'); }
+function mkLabel(k) { const [y,m] = k.split('-'); return MES[parseInt(m)]+' '+y; }
+function buildMonths(weeks) {
+  const mMap = {};
+  for (const w of weeks) {
+    if (!w.days.length) continue;
+    const mk = mkKey(w.days[0]._date);
+    if (!mMap[mk]) mMap[mk] = { label: mkLabel(mk), weeks: [], totals: {accesos:0,ventas:0,conv:[],unidades:0,transacciones:0}, locData: {} };
+    mMap[mk].weeks.push(w);
+  }
+  const keys = Object.keys(mMap).sort();
+  // Per-month aggregation
+  for (const k of keys) {
+    const m = mMap[k];
+    const locA = {}, locV = {}, locC = {}, locU = {}, locT = {};
+    for (const w of m.weeks) {
+      for (const li in w.locations) {
+        const ln = w.locations[li];
+        if (!locA[ln]) { locA[ln]=0; locV[ln]=0; locC[ln]=[]; locU[ln]=0; locT[ln]=0; }
+        for (const d of w.days) {
+          const x = d['l'+li]; if (!x) continue;
+          if (x.a) { m.totals.accesos += x.a; locA[ln] += x.a; }
+          if (x.v) { m.totals.ventas += x.v; locV[ln] += x.v; }
+          if (x.t !== null) { m.totals.conv.push(x.t); locC[ln].push(x.t); }
+          if (x.u) { m.totals.unidades += x.u; locU[ln] += x.u; }
+          if (x.r) { m.totals.transacciones += x.r; locT[ln] += x.r; }
+        }
+      }
+    }
+    m.totals.tasaConv = m.totals.conv.length ? m.totals.conv.reduce((a,b)=>a+b,0)/m.totals.conv.length : null;
+    m.locData = {};
+    for (const ln of Object.keys(locA)) m.locData[ln] = {
+      accesos: locA[ln], ventas: locV[ln],
+      tasaConv: locC[ln].length ? locC[ln].reduce((a,b)=>a+b,0)/locC[ln].length : null,
+      unidades: locU[ln], transacciones: locT[ln]
+    };
+  }
+  // Build all-time accumulator from all weeks (raw, not from months, for accuracy)
+  const allA = {}, allV = {}, allC = {}, allU = {}, allT = {};
+  const allTot = { accesos: 0, ventas: 0, conv: [], unidades: 0, transacciones: 0 };
+  for (const w of weeks) {
+    for (const li in w.locations) {
+      const ln = w.locations[li];
+      if (!allA[ln]) { allA[ln]=0; allV[ln]=0; allC[ln]=[]; allU[ln]=0; allT[ln]=0; }
+      for (const d of w.days) {
+        const x = d['l'+li]; if (!x) continue;
+        if (x.a) { allTot.accesos += x.a; allA[ln] += x.a; }
+        if (x.v) { allTot.ventas += x.v; allV[ln] += x.v; }
+        if (x.t !== null) { allTot.conv.push(x.t); allC[ln].push(x.t); }
+        if (x.u) { allTot.unidades += x.u; allU[ln] += x.u; }
+        if (x.r) { allTot.transacciones += x.r; allT[ln] += x.r; }
+      }
+    }
+  }
+  const allLoc = {};
+  for (const ln of Object.keys(allA)) allLoc[ln] = {
+    accesos: allA[ln], ventas: allV[ln],
+    tasaConv: allC[ln].length ? allC[ln].reduce((a,b)=>a+b,0)/allC[ln].length : null,
+    unidades: allU[ln], transacciones: allT[ln]
+  };
+  const result = {};
+  for (const k of keys) result[k] = mMap[k];
+  result._all = {
+    label: '📊 Acumulado Total',
+    weeks: weeks,
+    totals: { ...allTot, tasaConv: allTot.conv.length ? allTot.conv.reduce((a,b)=>a+b,0)/allTot.conv.length : null },
+    locData: allLoc
+  };
+  return result;
+}
+// ===== FORMATTERS =====
+const fn = (n) => (n===null||isNaN(n))?'—':n.toLocaleString('es-ES',{maximumFractionDigits:1});
+const fe = (n) => (n===null||isNaN(n))?'—':n.toLocaleString('es-ES',{style:'currency',currency:'EUR',minimumFractionDigits:0});
+const fs = (n) => { if (n===null||isNaN(n)) return '—'; if (n>=1e6) return (n/1e6).toFixed(1)+'M'; if (n>=1e3) return (n/1e3).toFixed(1)+'K'; return n.toFixed(0); };
+const fse = (n) => { if (n===null||isNaN(n)) return '—'; if (n>=1e6) return (n/1e6).toFixed(1)+'M €'; if (n>=1e3) return (n/1e3).toFixed(1)+'K €'; return n.toFixed(0)+' €'; };
+const fp = (n) => (n===null||isNaN(n))?'—':n.toFixed(2)+'%';
+const pct = (c, p) => (p===null||isNaN(p)||c===null||isNaN(c)||p===0)?null:((c-p)/Math.abs(p))*100;
+// ===== RENDER =====
+function render() {
+  const mk = selectedMonth || '_all';
+  if (!months[mk]) return;
+  selectedMonth = mk;
+  const isAll = mk === '_all';
+  const month = months[mk];
+  const prevKey = (!isAll && monthKeys.indexOf(mk) > 0) ? monthKeys[monthKeys.indexOf(mk)-1] : null;
+  const prevMonth = prevKey ? months[prevKey] : null;
+  // Month buttons
+  const bar = document.getElementById('monthBar');
+  bar.innerHTML = '<button class="month-btn all-btn'+(isAll?' active':'')+'" data-m="all" onclick="sel(\'_all\')">📊 Acumulado<br><small style="font-weight:400;opacity:.7">Todo el período</small></button>' +
+    monthKeys.map(mk2 => {
+      const m2 = months[mk2];
+      return '<button class="month-btn'+(mk2===mk?' active':'')+'" data-m="'+mk2+'" onclick="sel(\''+mk2+'\')">'+m2.label+'<br><small style="font-weight:400;opacity:.7">'+fn(m2.totals.accesos)+' acc · '+fse(m2.totals.ventas)+'</small></button>';
+    }).join('');
+  // KPIs
+  const t = month.totals;
+  const label = month.label.replace('📊 ','');
+  const chg = (cur, pr) => { const c = pct(cur, pr); if (c===null) return ''; const cls = c>=0?'up':'down'; const a = c>=0?'▲':'▼'; return '<span class="'+cls+'">'+a+' '+Math.abs(c).toFixed(1)+'% vs '+prevMonth.label+'</span>'; };
+  const subText = isAll ? '<span style="color:var(--text-secondary)">Total acumulado</span>' : (prevMonth ? chg(t.accesos, prevMonth.totals.accesos) : '');
+  const subTextV = isAll ? '<span style="color:var(--text-secondary)">Total acumulado</span>' : (prevMonth ? chg(t.ventas, prevMonth.totals.ventas) : '');
+  const subTextC = isAll ? '<span style="color:var(--text-secondary)">Media global</span>' : (prevMonth ? chg(t.tasaConv, prevMonth.totals.tasaConv) : '');
+  const subTextU = isAll ? '<span style="color:var(--text-secondary)">Total acumulado</span>' : (prevMonth ? chg(t.unidades, prevMonth.totals.unidades) : '');
+  const subTextR = isAll ? '<span style="color:var(--text-secondary)">Total acumulado</span>' : (prevMonth ? chg(t.transacciones, prevMonth.totals.transacciones) : '');
+  document.getElementById('kpiGrid').innerHTML =
+    '<div class="kpi-card" style="border-left:4px solid var(--primary)"><div class="kpi-label">Accesos <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fn(t.accesos)+'</div><div class="kpi-sub">'+subText+'</div></div>'+
+    '<div class="kpi-card" style="border-left:4px solid var(--green)"><div class="kpi-label">Ventas <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fse(t.ventas)+'</div><div class="kpi-sub">'+subTextV+'</div></div>'+
+    '<div class="kpi-card" style="border-left:4px solid var(--orange)"><div class="kpi-label">Tasa Conversión <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fp(t.tasaConv)+'</div><div class="kpi-sub">'+subTextC+'</div></div>'+
+    '<div class="kpi-card" style="border-left:4px solid var(--purple)"><div class="kpi-label">Unidades <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fn(t.unidades)+'</div><div class="kpi-sub">'+subTextU+'</div></div>'+
+    '<div class="kpi-card" style="border-left:4px solid var(--red)"><div class="kpi-label">Transacciones <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fn(t.transacciones)+'</div><div class="kpi-sub">'+subTextR+'</div></div>';
+  // Monthly chart (always show all months)
+  destroyChart('M');
+  charts.M = new Chart(document.getElementById('chartMonthly'), {
+    type: 'bar',
+    data: {
+      labels: monthKeys.map(k => months[k].label.replace('📊 ','')),
+      datasets: [
+        { label: 'Accesos', data: monthKeys.map(k => months[k].totals.accesos), backgroundColor: '#2563eb80', borderColor: '#2563eb', borderWidth: 1, borderRadius: 3, yAxisID: 'y' },
+        { label: 'Ventas (€)', data: monthKeys.map(k => months[k].totals.ventas), backgroundColor: '#05966980', borderColor: '#059669', borderWidth: 1, borderRadius: 3, yAxisID: 'y1' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 14, padding: 12, usePointStyle: true } }, tooltip: { callbacks: { label: ctx => ctx.datasetIndex === 0 ? 'Accesos: '+fn(ctx.raw) : 'Ventas: '+fse(ctx.raw) } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+        y: { beginAtZero: true, position: 'left', grid: { color: '#f0f0f0' }, ticks: { callback: v => fs(v) } },
+        y1: { beginAtZero: true, position: 'right', grid: { display: false }, ticks: { callback: v => fse(v) } }
+      }
+    }
+  });
+  // Location chart
+  const locNames = Object.keys(month.locData);
+  const badge = isAll ? 'Total' : month.label;
+  document.getElementById('locBadge').textContent = badge;
+  destroyChart('L');
+  charts.L = new Chart(document.getElementById('chartLoc'), {
+    type: 'bar',
+    data: {
+      labels: locNames,
+      datasets: [
+        { label: 'Accesos', data: locNames.map(l => month.locData[l].accesos), backgroundColor: locNames.map((_,i) => LOC_COLORS[i%5]+'99'), borderColor: locNames.map((_,i) => LOC_COLORS[i%5]), borderWidth: 1, borderRadius: 3 },
+        { label: 'Ventas (€)', data: locNames.map(l => month.locData[l].ventas), backgroundColor: locNames.map((_,i) => LOC_COLORS[(i+1)%5]+'99'), borderColor: locNames.map((_,i) => LOC_COLORS[(i+1)%5]), borderWidth: 1, borderRadius: 3 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 14, padding: 12, usePointStyle: true } }, tooltip: { callbacks: { label: ctx => ctx.datasetIndex === 0 ? 'Accesos: '+fn(ctx.raw) : 'Ventas: '+fse(ctx.raw) } } },
+      scales: { x: { grid: { display: false }, ticks: { font: { size: 11 } } }, y: { beginAtZero: true, grid: { color: '#f0f0f0' } } }
+    }
+  });
+  // Conversion chart
+  document.getElementById('convBadge').textContent = badge;
+  destroyChart('C');
+  charts.C = new Chart(document.getElementById('chartConv'), {
+    type: 'bar',
+    data: {
+      labels: locNames,
+      datasets: [{ label: 'Tasa Conversión', data: locNames.map(l => month.locData[l].tasaConv), backgroundColor: locNames.map((_,i) => LOC_COLORS[i%5]+'99'), borderColor: locNames.map((_,i) => LOC_COLORS[i%5]), borderWidth: 1, borderRadius: 3 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => 'Tasa: '+fp(ctx.raw) } } },
+      scales: { x: { beginAtZero: true, grid: { color: '#f0f0f0' }, ticks: { callback: v => v+'%' } }, y: { grid: { display: false }, ticks: { font: { size: 11 } } } }
+    }
+  });
+  // Weekly trend
+  document.getElementById('weeklyBadge').textContent = badge;
+  destroyChart('W');
+  const weeks = month.weeks;
+  const wLabels = weeks.map((_,i) => 'S'+(i+1));
+  const wAcc = weeks.map(w => { let s=0; for (const d of w.days) for (let li=0; li<w.locations.length; li++) { const x=d['l'+li]; if (x&&x.a) s+=x.a; } return s; });
+  const wVen = weeks.map(w => { let s=0; for (const d of w.days) for (let li=0; li<w.locations.length; li++) { const x=d['l'+li]; if (x&&x.v) s+=x.v; } return s; });
+  // If all-time, group weeks into months for the weekly chart
+  let weeklyLabels = wLabels, weeklyAcc = wAcc, weeklyVen = wVen;
+  if (isAll && weeks.length > 15) {
+    // Group by month
+    const mGroups = {};
+    for (const w of weeks) {
+      const mk2 = mkKey(w.days[0]._date);
+      if (!mGroups[mk2]) mGroups[mk2] = { acc: 0, ven: 0 };
+      for (const d of w.days) for (let li=0; li<w.locations.length; li++) { const x=d['l'+li]; if (x&&x.a) mGroups[mk2].acc += x.a; if (x&&x.v) mGroups[mk2].ven += x.v; }
+    }
+    const sortedM = Object.keys(mGroups).sort();
+    weeklyLabels = sortedM.map(k => MES[parseInt(k.split('-')[1])]);
+    weeklyAcc = sortedM.map(k => mGroups[k].acc);
+    weeklyVen = sortedM.map(k => mGroups[k].ven);
+  }
+  charts.W = new Chart(document.getElementById('chartWeekly'), {
+    type: 'line',
+    data: {
+      labels: weeklyLabels,
+      datasets: [
+        { label: 'Accesos', data: weeklyAcc, borderColor: '#2563eb', backgroundColor: '#2563eb15', fill: true, tension: .3, pointRadius: 4 },
+        { label: 'Ventas (€)', data: weeklyVen, borderColor: '#059669', backgroundColor: '#05966915', fill: true, tension: .3, pointRadius: 4, yAxisID: 'y1' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 14, padding: 12, usePointStyle: true } }, tooltip: { callbacks: { label: ctx => ctx.datasetIndex === 0 ? 'Accesos: '+fn(ctx.raw) : 'Ventas: '+fse(ctx.raw) } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+        y: { beginAtZero: true, position: 'left', grid: { color: '#f0f0f0' }, ticks: { callback: v => fs(v) } },
+        y1: { beginAtZero: true, position: 'right', grid: { display: false }, ticks: { callback: v => fse(v) } }
+      }
+    }
+  });
+  // Table
+  document.getElementById('tableBadge').textContent = badge;
+  let html = '<table><thead><tr><th>Localidad</th><th class="text-right">Accesos</th><th class="text-right">Ventas</th><th class="text-right">Tasa Conv.</th><th class="text-right">Unidades</th><th class="text-right">Trans.</th></tr></thead><tbody>';
+  locNames.forEach((l, i) => {
+    const d = month.locData[l];
+    html += '<tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+LOC_COLORS[i%5]+';margin-right:6px"></span>'+l+'</td>'+
+      '<td class="text-right">'+fn(d.accesos)+'</td><td class="text-right">'+fe(d.ventas)+'</td><td class="text-right">'+fp(d.tasaConv)+'</td><td class="text-right">'+fn(d.unidades)+'</td><td class="text-right">'+fn(d.transacciones)+'</td></tr>';
+  });
+  html += '<tr class="total-row"><td><strong>Total '+label+'</strong></td><td class="text-right"><strong>'+fn(t.accesos)+'</strong></td><td class="text-right"><strong>'+fse(t.ventas)+'</strong></td><td class="text-right"><strong>'+fp(t.tasaConv)+'</strong></td><td class="text-right"><strong>'+fn(t.unidades)+'</strong></td><td class="text-right"><strong>'+fn(t.transacciones)+'</strong></td></tr>';
+  html += '</tbody></table>';
+  document.getElementById('monthlyTableWrap').innerHTML = html;
+}
+function destroyChart(k) { if (charts[k]) { charts[k].destroy(); delete charts[k]; } }
+function sel(mk) { selectedMonth = mk; render(); setTimeout(() => Object.values(charts).forEach(c => { if (c.resize) c.resize(); }), 60); }
+// ===== LOAD =====
+async function loadData() {
+  const btn = document.getElementById('refreshBtn'), loading = document.getElementById('loadingState'), content = document.getElementById('dashboardContent');
+  btn.classList.add('loading'); btn.disabled = true;
+  document.getElementById('errorMsg').style.display = 'none';
+  const first = !content.style.display || content.style.display === 'none';
+  if (first) loading.style.display = 'flex';
+  try {
+    const r = await fetch(CSV_URL, { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    const text = await r.text();
+    weekData = parseData(parseCSV(text));
+    if (!weekData.length) throw new Error('No se pudieron extraer datos.');
+    months = buildMonths(weekData);
+    monthKeys = Object.keys(months).filter(k => k !== '_all').sort();
+    if (!monthKeys.length) throw new Error('No hay meses con datos.');
+    if (!selectedMonth || !months[selectedMonth]) selectedMonth = '_all';
+    render();
+    document.getElementById('lastUpdate').textContent = 'Actualizado: '+new Date().toLocaleString('es-ES');
+    loading.style.display = 'none'; content.style.display = 'block';
+  } catch (e) {
+    loading.style.display = 'none'; content.style.display = 'none';
+    document.getElementById('errorMsg').innerHTML = 'Error: '+e.message+'<br><br>📌 Publica la hoja: Archivo → Compartir → Publicar en web → CSV';
+    document.getElementById('errorMsg').style.display = 'block';
+  } finally { btn.classList.remove('loading'); btn.disabled = false; }
+}
+loadData();
+setInterval(loadData, 5 * 60 * 1000);
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "dashboard-estadisticas",
+  "version": "1.0.0",
+  "description": "Dashboard de estadísticas de acceso desde Google Sheets",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
