@@ -10,76 +10,74 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#f1f4f9;
-  --surface:#fff;
-  --border:#e4e7ed;
-  --text:#161b22;
-  --text-secondary:#5c6570;
-  --primary:#2563eb;
-  --primary-light:#eef4ff;
-  --green:#059669;
-  --green-bg:#ecfdf5;
-  --red:#dc2626;
-  --red-bg:#fef2f2;
-  --orange:#d97706;
-  --purple:#7c3aed;
+  --bg:#f1f4f9;--surface:#fff;--border:#e4e7ed;--text:#161b22;--text-secondary:#5c6570;
+  --primary:#2563eb;--primary-light:#eef4ff;--green:#059669;--green-bg:#ecfdf5;
+  --red:#dc2626;--red-bg:#fef2f2;--orange:#d97706;--purple:#7c3aed;
   --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
-  --radius:12px;
-  --radius-sm:8px;
-  --font:'Inter',-apple-system,sans-serif;
+  --radius:12px;--radius-sm:8px;--font:'Inter',-apple-system,sans-serif;
 }
 body{font-family:var(--font);background:var(--bg);color:var(--text);padding:24px;min-height:100vh}
 .dashboard{max-width:1360px;margin:0 auto}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
 .header-left h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
 .header-left .sub{font-size:13px;color:var(--text-secondary);margin-top:2px}
-.header-right{display:flex;align-items:center;gap:14px;font-size:13px;color:var(--text-secondary)}
-.refresh-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:13px;font-weight:500;color:var(--text);transition:all .12s}
-.refresh-btn:hover{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
-.refresh-btn:disabled{opacity:.5;cursor:wait}
-.refresh-btn .spinner{display:none;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .6s linear infinite}
-.refresh-btn.loading .spinner{display:inline-block}
-.refresh-btn.loading .label{display:none}
+.header-right{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary);flex-wrap:wrap}
+.header-btn{display:flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:12px;font-weight:500;color:var(--text);transition:all .12s;text-decoration:none}
+.header-btn:hover{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+.header-btn:disabled{opacity:.5;cursor:wait}
+.header-btn .spinner{display:none;width:13px;height:13px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .6s linear infinite}
+.header-btn.loading .spinner{display:inline-block}
+.header-btn.loading .label{display:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 .month-bar{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;background:var(--surface);padding:6px;border-radius:var(--radius-sm);box-shadow:var(--shadow);border:1px solid var(--border)}
-.month-btn{padding:8px 18px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-secondary);background:transparent;transition:all .12s}
+.month-btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;color:var(--text-secondary);background:transparent;transition:all .12s;text-align:left;line-height:1.3}
 .month-btn:hover{background:var(--bg);color:var(--text)}
 .month-btn.active{background:var(--primary);color:#fff;box-shadow:0 1px 3px rgba(37,99,235,.3)}
 .month-btn.all-btn{background:var(--surface);border:1.5px dashed var(--border)}
 .month-btn.all-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:14px;margin-bottom:24px}
-.kpi-card{background:var(--surface);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);border:1px solid var(--border)}
-.kpi-card .kpi-label{font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;display:flex;align-items:center;gap:6px}
-.kpi-card .kpi-value{font-size:26px;font-weight:700;line-height:1.2}
-.kpi-card .kpi-sub{display:flex;align-items:center;gap:6px;font-size:13px;margin-top:5px}
-.kpi-card .kpi-sub .up{color:var(--green)}
-.kpi-card .kpi-sub .down{color:var(--red)}
-.kpi-period-tag{font-size:11px;color:var(--text-secondary);font-weight:400}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:24px}
+.kpi-card{background:var(--surface);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);border:1px solid var(--border);position:relative}
+.kpi-card .kpi-label{font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;display:flex;align-items:center;gap:6px}
+.kpi-card .kpi-value{font-size:24px;font-weight:700;line-height:1.2}
+.kpi-card .kpi-sub{display:flex;align-items:center;gap:6px;font-size:12px;margin-top:4px}
+.kpi-card .kpi-sub .up{color:var(--green);font-weight:600}
+.kpi-card .kpi-sub .down{color:var(--red);font-weight:600}
+.kpi-period-tag{font-size:10px;color:var(--text-secondary);font-weight:400}
+/* Progress bar */
+.progress-bar{height:5px;background:#e5e7eb;border-radius:3px;margin-top:8px;overflow:hidden}
+.progress-bar .fill{height:100%;border-radius:3px;transition:width .6s ease}
+.progress-label{font-size:11px;color:var(--text-secondary);margin-top:3px;display:flex;justify-content:space-between}
+/* Top/Flop badges */
+.rank-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:1px 7px;border-radius:8px;margin-left:6px}
+.rank-badge.top{background:var(--green-bg);color:var(--green)}
+.rank-badge.flop{background:var(--red-bg);color:var(--red)}
 .chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:18px;margin-bottom:18px}
 .chart-card{background:var(--surface);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);border:1px solid var(--border)}
-.chart-card h3{font-size:14px;font-weight:600;margin-bottom:14px;color:var(--text);display:flex;align-items:center;gap:8px}
+.chart-card h3{font-size:14px;font-weight:600;margin-bottom:14px;color:var(--text);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .chart-card h3 .badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:10px;background:var(--primary-light);color:var(--primary)}
-.chart-wrap{position:relative;height:280px}
-.chart-wrap.tall{height:340px}
+.chart-card h3 .badge.green{background:var(--green-bg);color:var(--green)}
+.chart-card h3 .badge.orange{background:#fffbeb;color:var(--orange)}
+.chart-wrap{position:relative;height:270px}
+.chart-wrap.tall{height:330px}
 .chart-wrap canvas{max-width:100%;max-height:100%}
 .table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px}
-thead th{background:var(--bg);padding:9px 11px;text-align:left;font-weight:600;border-bottom:2px solid var(--border);white-space:nowrap}
-tbody td{padding:8px 11px;border-bottom:1px solid var(--border);white-space:nowrap}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+thead th{background:var(--bg);padding:8px 10px;text-align:left;font-weight:600;border-bottom:2px solid var(--border);white-space:nowrap}
+tbody td{padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
 tbody tr:hover{background:#f8faff}
 tbody tr.total-row{font-weight:600;background:var(--primary-light)}
+tbody tr.top-row{background:#f0fdf4!important}
+tbody tr.flop-row{background:#fef2f2!important}
 .text-right{text-align:right}
+.text-center{text-align:center}
 .loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 20px;color:var(--text-secondary)}
 .loading-state .spinner-lg{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .6s linear infinite;margin-bottom:14px}
 .loading-state p{font-size:14px}
 .error-state{background:#fef2f2;border:1px solid #fecaca;border-radius:var(--radius);padding:18px 22px;color:var(--red);margin-bottom:18px;font-size:13px}
+/* Print */
+@media print{body{padding:12px;background:#fff}.header-right,.month-bar{display:none!important}.chart-card{break-inside:avoid;box-shadow:none;border:1px solid #ddd}.kpi-card{break-inside:avoid}.refresh-btn{display:none!important}}
 @media(max-width:768px){
-  body{padding:12px}
-  .kpi-grid{grid-template-columns:repeat(2,1fr)}
-  .chart-grid{grid-template-columns:1fr}
-  .chart-wrap{height:220px}
-  .month-bar{overflow-x:auto;flex-wrap:nowrap}
-  .month-btn{white-space:nowrap}
+  body{padding:12px}.kpi-grid{grid-template-columns:repeat(2,1fr)}.chart-grid{grid-template-columns:1fr}.chart-wrap{height:220px}.month-bar{overflow-x:auto;flex-wrap:nowrap}.month-btn{white-space:nowrap}
 }
 @media(max-width:480px){.kpi-grid{grid-template-columns:1fr}}
 </style>
@@ -93,8 +91,9 @@ tbody tr.total-row{font-weight:600;background:var(--primary-light)}
     </div>
     <div class="header-right">
       <span id="lastUpdate">—</span>
-      <button class="refresh-btn" id="refreshBtn" onclick="loadData()">
-        <span class="spinner"></span><span class="label">⟳ Actualizar</span>
+      <button class="header-btn" onclick="window.print()">🖨️ Exportar PDF</button>
+      <button class="header-btn refresh-btn" id="refreshBtn" onclick="loadData()">
+        <span class="spinner"></span><span class="label">⟳</span>
       </button>
     </div>
   </div>
@@ -107,38 +106,48 @@ tbody tr.total-row{font-weight:600;background:var(--primary-light)}
     <div class="month-bar" id="monthBar"></div>
     <div class="kpi-grid" id="kpiGrid"></div>
     <div class="chart-grid">
-      <div class="chart-card">
-        <h3>Evolución Mensual <span class="badge">Total</span></h3>
-        <div class="chart-wrap tall"><canvas id="chartMonthly"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <h3>Por Localidad <span class="badge" id="locBadge">—</span></h3>
-        <div class="chart-wrap"><canvas id="chartLoc"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <h3>Conversión por Localidad <span class="badge" id="convBadge">—</span></h3>
-        <div class="chart-wrap"><canvas id="chartConv"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <h3>Tendencia por Semana <span class="badge" id="weeklyBadge">—</span></h3>
-        <div class="chart-wrap"><canvas id="chartWeekly"></canvas></div>
-      </div>
+      <div class="chart-card"><h3>Evolución Mensual <span class="badge">Total</span></h3><div class="chart-wrap tall"><canvas id="chartMonthly"></canvas></div></div>
+      <div class="chart-card"><h3>Por Localidad <span class="badge" id="locBadge">—</span></h3><div class="chart-wrap"><canvas id="chartLoc"></canvas></div></div>
+      <div class="chart-card"><h3>Conversión por Localidad <span class="badge" id="convBadge">—</span></h3><div class="chart-wrap"><canvas id="chartConv"></canvas></div></div>
+      <div class="chart-card"><h3>Tendencia por Semana <span class="badge" id="weeklyBadge">—</span></h3><div class="chart-wrap"><canvas id="chartWeekly"></canvas></div></div>
+      <div class="chart-card"><h3>Promedio por Día de Semana <span class="badge green">Rendimiento</span></h3><div class="chart-wrap"><canvas id="chartWeekday"></canvas></div></div>
     </div>
-    <div class="chart-card">
+    <div class="chart-card" id="tableCard">
       <h3>Resumen por Localidad <span class="badge" id="tableBadge">—</span></h3>
       <div class="table-wrap" id="monthlyTableWrap"></div>
     </div>
   </div>
 </div>
 <script>
-// ===== CONFIG =====
+// ============================================================
+// CONFIG
+// ============================================================
 const CSV_URL = '/api/csv';
 const LOC_COLORS = ['#2563eb','#059669','#d97706','#7c3aed','#dc2626'];
 const LOC_NAMES = ['ESTAFETA 41 (Toros)','ESTAFETA 76','ZARAGOZA','DONOSTI','BILBAO'];
 const MES = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-// ===== STATE =====
-let weekData = [], months = {}, monthKeys = [], selectedMonth = null, charts = {};
-// ===== CSV PARSE =====
+const DIA = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const DIA_CORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+// Monthly sales targets per location (€)
+const TARGETS = {
+  'ESTAFETA 41 (Toros)': 18600,
+  'ESTAFETA 76': 18600,
+  'ZARAGOZA': 18600,
+  'DONOSTI': 18600,
+  'BILBAO': 18600,
+  'LLEIDA': 13500,
+  'SEGOVIA': 15500,
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let weekData = [], months = {}, monthKeys = [], selectedMonth = null, charts = {}, allDayData = [];
+
+// ============================================================
+// PARSE
+// ============================================================
 function parseCSV(text) {
   const rows = []; let cur = [], f = '', q = false;
   for (let i = 0; i < text.length; i++) {
@@ -181,9 +190,8 @@ function parseData(rows) {
       const parts = first.split('/');
       if (parts.length === 3) {
         const dd = {};
-        for (let li = 0; li < curWeek.locations.length && 1+li*5+4 < row.length; li++) {
+        for (let li = 0; li < curWeek.locations.length && 1+li*5+4 < row.length; li++)
           dd['l'+li] = { a: num(row[1+li*5]), v: num(row[2+li*5]), t: num(row[3+li*5]), u: num(row[4+li*5]), r: num(row[5+li*5]) };
-        }
         dd._date = first; curWeek.days.push(dd);
       }
     }
@@ -193,19 +201,40 @@ function parseData(rows) {
   for (const w of weeks) { const s = new Set(); for (let i = 0; i < w.locations.length; i++) { if (s.has(w.locations[i])) w.locations[i] += ' (2)'; s.add(w.locations[i]); } }
   return weeks;
 }
-// ===== AGGREGATE =====
+
+// ============================================================
+// AGGREGATE
+// ============================================================
 function mkKey(d) { const p = d.split('/'); return p[2]+'-'+String(p[1]).padStart(2,'0'); }
 function mkLabel(k) { const [y,m] = k.split('-'); return MES[parseInt(m)]+' '+y; }
+
+// Day-of-week from DD/MM/YYYY
+function dayOfWeek(dateStr) {
+  const [d,m,y] = dateStr.split('/').map(Number);
+  return new Date(y, m-1, d).getDay(); // 0=Sun
+}
+
 function buildMonths(weeks) {
   const mMap = {};
+  // Collect all daily data for weekday analysis
+  allDayData = [];
+
   for (const w of weeks) {
     if (!w.days.length) continue;
     const mk = mkKey(w.days[0]._date);
     if (!mMap[mk]) mMap[mk] = { label: mkLabel(mk), weeks: [], totals: {accesos:0,ventas:0,conv:[],unidades:0,transacciones:0}, locData: {} };
     mMap[mk].weeks.push(w);
+
+    for (const d of w.days) {
+      const dow = dayOfWeek(d._date);
+      for (let li = 0; li < w.locations.length; li++) {
+        const x = d['l'+li]; if (!x) continue;
+        allDayData.push({ dow, loc: w.locations[li], a: x.a||0, v: x.v||0, t: x.t });
+      }
+    }
   }
+
   const keys = Object.keys(mMap).sort();
-  // Per-month aggregation
   for (const k of keys) {
     const m = mMap[k];
     const locA = {}, locV = {}, locC = {}, locU = {}, locT = {};
@@ -231,7 +260,8 @@ function buildMonths(weeks) {
       unidades: locU[ln], transacciones: locT[ln]
     };
   }
-  // Build all-time accumulator from all weeks (raw, not from months, for accuracy)
+
+  // All-time
   const allA = {}, allV = {}, allC = {}, allU = {}, allT = {};
   const allTot = { accesos: 0, ventas: 0, conv: [], unidades: 0, transacciones: 0 };
   for (const w of weeks) {
@@ -257,21 +287,35 @@ function buildMonths(weeks) {
   const result = {};
   for (const k of keys) result[k] = mMap[k];
   result._all = {
-    label: '📊 Acumulado Total',
-    weeks: weeks,
+    label: '📊 Acumulado Total', weeks: weeks,
     totals: { ...allTot, tasaConv: allTot.conv.length ? allTot.conv.reduce((a,b)=>a+b,0)/allTot.conv.length : null },
     locData: allLoc
   };
   return result;
 }
-// ===== FORMATTERS =====
+
+// ============================================================
+// HELPERS
+// ============================================================
 const fn = (n) => (n===null||isNaN(n))?'—':n.toLocaleString('es-ES',{maximumFractionDigits:1});
 const fe = (n) => (n===null||isNaN(n))?'—':n.toLocaleString('es-ES',{style:'currency',currency:'EUR',minimumFractionDigits:0});
 const fs = (n) => { if (n===null||isNaN(n)) return '—'; if (n>=1e6) return (n/1e6).toFixed(1)+'M'; if (n>=1e3) return (n/1e3).toFixed(1)+'K'; return n.toFixed(0); };
 const fse = (n) => { if (n===null||isNaN(n)) return '—'; if (n>=1e6) return (n/1e6).toFixed(1)+'M €'; if (n>=1e3) return (n/1e3).toFixed(1)+'K €'; return n.toFixed(0)+' €'; };
 const fp = (n) => (n===null||isNaN(n))?'—':n.toFixed(2)+'%';
 const pct = (c, p) => (p===null||isNaN(p)||c===null||isNaN(c)||p===0)?null:((c-p)/Math.abs(p))*100;
-// ===== RENDER =====
+const targetPct = (val, target) => target ? Math.min(100, (val/target)*100) : 0;
+const sum = (arr) => arr.reduce((a,b)=>a+(b||0),0);
+const avg = (arr) => { const v = arr.filter(x => x !== null && !isNaN(x)); return v.length ? sum(v)/v.length : 0; };
+
+function getTarget(locName) {
+  // Fuzzy match
+  for (const [k, v] of Object.entries(TARGETS)) if (locName.toUpperCase().includes(k)) return v;
+  return null;
+}
+
+// ============================================================
+// RENDER
+// ============================================================
 function render() {
   const mk = selectedMonth || '_all';
   if (!months[mk]) return;
@@ -280,29 +324,46 @@ function render() {
   const month = months[mk];
   const prevKey = (!isAll && monthKeys.indexOf(mk) > 0) ? monthKeys[monthKeys.indexOf(mk)-1] : null;
   const prevMonth = prevKey ? months[prevKey] : null;
-  // Month buttons
+  const label = month.label.replace('📊 ','');
+  const t = month.totals;
+
+  // ---- Month buttons ----
   const bar = document.getElementById('monthBar');
   bar.innerHTML = '<button class="month-btn all-btn'+(isAll?' active':'')+'" data-m="all" onclick="sel(\'_all\')">📊 Acumulado<br><small style="font-weight:400;opacity:.7">Todo el período</small></button>' +
     monthKeys.map(mk2 => {
       const m2 = months[mk2];
       return '<button class="month-btn'+(mk2===mk?' active':'')+'" data-m="'+mk2+'" onclick="sel(\''+mk2+'\')">'+m2.label+'<br><small style="font-weight:400;opacity:.7">'+fn(m2.totals.accesos)+' acc · '+fse(m2.totals.ventas)+'</small></button>';
     }).join('');
-  // KPIs
-  const t = month.totals;
-  const label = month.label.replace('📊 ','');
+
+  // ---- Rank locations by ventas (for top/flop) ----
+  const locNames = Object.keys(month.locData);
+  const ranked = locNames.map(l => ({ name: l, ventas: month.locData[l].ventas })).sort((a,b) => b.ventas - a.ventas);
+  const topLoc = ranked.length ? ranked[0].name : null;
+  const flopLoc = ranked.length ? ranked[ranked.length-1].name : null;
+
+  // ---- KPIs ----
   const chg = (cur, pr) => { const c = pct(cur, pr); if (c===null) return ''; const cls = c>=0?'up':'down'; const a = c>=0?'▲':'▼'; return '<span class="'+cls+'">'+a+' '+Math.abs(c).toFixed(1)+'% vs '+prevMonth.label+'</span>'; };
-  const subText = isAll ? '<span style="color:var(--text-secondary)">Total acumulado</span>' : (prevMonth ? chg(t.accesos, prevMonth.totals.accesos) : '');
-  const subTextV = isAll ? '<span style="color:var(--text-secondary)">Total acumulado</span>' : (prevMonth ? chg(t.ventas, prevMonth.totals.ventas) : '');
-  const subTextC = isAll ? '<span style="color:var(--text-secondary)">Media global</span>' : (prevMonth ? chg(t.tasaConv, prevMonth.totals.tasaConv) : '');
-  const subTextU = isAll ? '<span style="color:var(--text-secondary)">Total acumulado</span>' : (prevMonth ? chg(t.unidades, prevMonth.totals.unidades) : '');
-  const subTextR = isAll ? '<span style="color:var(--text-secondary)">Total acumulado</span>' : (prevMonth ? chg(t.transacciones, prevMonth.totals.transacciones) : '');
+  const subAcc = isAll ? '<span style="color:var(--text-secondary)">Total acumulado</span>' : (prevMonth ? chg(t.accesos, prevMonth.totals.accesos) : '');
+  const subVen = isAll ? '<span style="color:var(--text-secondary)">Total acumulado</span>' : (prevMonth ? chg(t.ventas, prevMonth.totals.ventas) : '');
+  const subCnv = isAll ? '<span style="color:var(--text-secondary)">Media global</span>' : (prevMonth ? chg(t.tasaConv, prevMonth.totals.tasaConv) : '');
+  const subUni = isAll ? '<span style="color:var(--text-secondary)">Total acumulado</span>' : (prevMonth ? chg(t.unidades, prevMonth.totals.unidades) : '');
+  const subTra = isAll ? '<span style="color:var(--text-secondary)">Total acumulado</span>' : (prevMonth ? chg(t.transacciones, prevMonth.totals.transacciones) : '');
+
+  // Calculate total target progress
+  let totalTarget = 0, totalVentas = t.ventas || 0;
+  for (const ln of locNames) { const tr = getTarget(ln); if (tr) totalTarget += tr; }
+  const targetPr = targetPct(totalVentas, totalTarget);
+
   document.getElementById('kpiGrid').innerHTML =
-    '<div class="kpi-card" style="border-left:4px solid var(--primary)"><div class="kpi-label">Accesos <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fn(t.accesos)+'</div><div class="kpi-sub">'+subText+'</div></div>'+
-    '<div class="kpi-card" style="border-left:4px solid var(--green)"><div class="kpi-label">Ventas <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fse(t.ventas)+'</div><div class="kpi-sub">'+subTextV+'</div></div>'+
-    '<div class="kpi-card" style="border-left:4px solid var(--orange)"><div class="kpi-label">Tasa Conversión <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fp(t.tasaConv)+'</div><div class="kpi-sub">'+subTextC+'</div></div>'+
-    '<div class="kpi-card" style="border-left:4px solid var(--purple)"><div class="kpi-label">Unidades <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fn(t.unidades)+'</div><div class="kpi-sub">'+subTextU+'</div></div>'+
-    '<div class="kpi-card" style="border-left:4px solid var(--red)"><div class="kpi-label">Transacciones <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fn(t.transacciones)+'</div><div class="kpi-sub">'+subTextR+'</div></div>';
-  // Monthly chart (always show all months)
+    '<div class="kpi-card" style="border-left:4px solid var(--primary)"><div class="kpi-label">Accesos <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fn(t.accesos)+'</div><div class="kpi-sub">'+subAcc+'</div></div>'+
+    '<div class="kpi-card" style="border-left:4px solid var(--green)"><div class="kpi-label">Ventas <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fse(t.ventas)+'</div><div class="kpi-sub">'+subVen+'</div>'+
+      '<div class="progress-bar"><div class="fill" style="width:'+targetPr.toFixed(0)+'%;background:'+(targetPr>=100?'var(--green)':'var(--primary)')+'"></div></div>'+
+      '<div class="progress-label"><span>'+targetPr.toFixed(0)+'% del objetivo</span><span>'+fse(totalTarget)+'</span></div></div>'+
+    '<div class="kpi-card" style="border-left:4px solid var(--orange)"><div class="kpi-label">Tasa Conversión <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fp(t.tasaConv)+'</div><div class="kpi-sub">'+subCnv+'</div></div>'+
+    '<div class="kpi-card" style="border-left:4px solid var(--purple)"><div class="kpi-label">Unidades <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fn(t.unidades)+'</div><div class="kpi-sub">'+subUni+'</div></div>'+
+    '<div class="kpi-card" style="border-left:4px solid var(--red)"><div class="kpi-label">Transacciones <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fn(t.transacciones)+'</div><div class="kpi-sub">'+subTra+'</div></div>';
+
+  // ---- Monthly chart ----
   destroyChart('M');
   charts.M = new Chart(document.getElementById('chartMonthly'), {
     type: 'bar',
@@ -314,28 +375,41 @@ function render() {
       ]
     },
     options: {
-      responsive: true, maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
+      responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
       plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 14, padding: 12, usePointStyle: true } }, tooltip: { callbacks: { label: ctx => ctx.datasetIndex === 0 ? 'Accesos: '+fn(ctx.raw) : 'Ventas: '+fse(ctx.raw) } } },
-      scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-        y: { beginAtZero: true, position: 'left', grid: { color: '#f0f0f0' }, ticks: { callback: v => fs(v) } },
-        y1: { beginAtZero: true, position: 'right', grid: { display: false }, ticks: { callback: v => fse(v) } }
-      }
+      scales: { x: { grid: { display: false }, ticks: { font: { size: 11 } } }, y: { beginAtZero: true, position: 'left', grid: { color: '#f0f0f0' }, ticks: { callback: v => fs(v) } }, y1: { beginAtZero: true, position: 'right', grid: { display: false }, ticks: { callback: v => fse(v) } } }
     }
   });
-  // Location chart
-  const locNames = Object.keys(month.locData);
+
+  // ---- Location chart ----
   const badge = isAll ? 'Total' : month.label;
   document.getElementById('locBadge').textContent = badge;
   destroyChart('L');
+  const locAcc = locNames.map(l => month.locData[l].accesos);
+  const locVen = locNames.map(l => month.locData[l].ventas);
+  // Highlight top/flop
+  const locBGs = locNames.map(l => {
+    if (l === topLoc) return '#05966999';
+    if (l === flopLoc) return '#dc262699';
+    return LOC_COLORS[locNames.indexOf(l)%5]+'99';
+  });
+  const locBDs = locNames.map(l => {
+    if (l === topLoc) return '#059669';
+    if (l === flopLoc) return '#dc2626';
+    return LOC_COLORS[locNames.indexOf(l)%5];
+  });
   charts.L = new Chart(document.getElementById('chartLoc'), {
     type: 'bar',
     data: {
-      labels: locNames,
+      labels: locNames.map((l,i) => {
+        let suffix = '';
+        if (l === topLoc) suffix = ' 🏆';
+        else if (l === flopLoc) suffix = ' ⚠️';
+        return l + suffix;
+      }),
       datasets: [
-        { label: 'Accesos', data: locNames.map(l => month.locData[l].accesos), backgroundColor: locNames.map((_,i) => LOC_COLORS[i%5]+'99'), borderColor: locNames.map((_,i) => LOC_COLORS[i%5]), borderWidth: 1, borderRadius: 3 },
-        { label: 'Ventas (€)', data: locNames.map(l => month.locData[l].ventas), backgroundColor: locNames.map((_,i) => LOC_COLORS[(i+1)%5]+'99'), borderColor: locNames.map((_,i) => LOC_COLORS[(i+1)%5]), borderWidth: 1, borderRadius: 3 }
+        { label: 'Accesos', data: locAcc, backgroundColor: locBGs, borderColor: locBDs, borderWidth: locNames.map(l => l===topLoc||l===flopLoc ? 2 : 1), borderRadius: 3 },
+        { label: 'Ventas (€)', data: locVen, backgroundColor: locNames.map((_,i) => LOC_COLORS[(i+1)%5]+'99'), borderColor: locNames.map((_,i) => LOC_COLORS[(i+1)%5]), borderWidth: 1, borderRadius: 3 }
       ]
     },
     options: {
@@ -344,14 +418,20 @@ function render() {
       scales: { x: { grid: { display: false }, ticks: { font: { size: 11 } } }, y: { beginAtZero: true, grid: { color: '#f0f0f0' } } }
     }
   });
-  // Conversion chart
+
+  // ---- Conversion chart ----
   document.getElementById('convBadge').textContent = badge;
   destroyChart('C');
   charts.C = new Chart(document.getElementById('chartConv'), {
     type: 'bar',
     data: {
-      labels: locNames,
-      datasets: [{ label: 'Tasa Conversión', data: locNames.map(l => month.locData[l].tasaConv), backgroundColor: locNames.map((_,i) => LOC_COLORS[i%5]+'99'), borderColor: locNames.map((_,i) => LOC_COLORS[i%5]), borderWidth: 1, borderRadius: 3 }]
+      labels: locNames.map((l,i) => {
+        let suffix = '';
+        if (l === topLoc) suffix = ' 🏆';
+        else if (l === flopLoc) suffix = ' ⚠️';
+        return l + suffix;
+      }),
+      datasets: [{ label: 'Tasa Conversión', data: locNames.map(l => month.locData[l].tasaConv), backgroundColor: locBGs, borderColor: locBDs, borderWidth: locNames.map(l => l===topLoc||l===flopLoc ? 2 : 1), borderRadius: 3 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false, indexAxis: 'y',
@@ -359,35 +439,27 @@ function render() {
       scales: { x: { beginAtZero: true, grid: { color: '#f0f0f0' }, ticks: { callback: v => v+'%' } }, y: { grid: { display: false }, ticks: { font: { size: 11 } } } }
     }
   });
-  // Weekly trend
+
+  // ---- Weekly trend ----
   document.getElementById('weeklyBadge').textContent = badge;
   destroyChart('W');
   const weeks = month.weeks;
-  const wLabels = weeks.map((_,i) => 'S'+(i+1));
-  const wAcc = weeks.map(w => { let s=0; for (const d of w.days) for (let li=0; li<w.locations.length; li++) { const x=d['l'+li]; if (x&&x.a) s+=x.a; } return s; });
-  const wVen = weeks.map(w => { let s=0; for (const d of w.days) for (let li=0; li<w.locations.length; li++) { const x=d['l'+li]; if (x&&x.v) s+=x.v; } return s; });
-  // If all-time, group weeks into months for the weekly chart
-  let weeklyLabels = wLabels, weeklyAcc = wAcc, weeklyVen = wVen;
+  let wLabels = weeks.map((_,i) => 'S'+(i+1));
+  let wAcc = weeks.map(w => { let s=0; for (const d of w.days) for (let li=0; li<w.locations.length; li++) { const x=d['l'+li]; if (x&&x.a) s+=x.a; } return s; });
+  let wVen = weeks.map(w => { let s=0; for (const d of w.days) for (let li=0; li<w.locations.length; li++) { const x=d['l'+li]; if (x&&x.v) s+=x.v; } return s; });
   if (isAll && weeks.length > 15) {
-    // Group by month
-    const mGroups = {};
-    for (const w of weeks) {
-      const mk2 = mkKey(w.days[0]._date);
-      if (!mGroups[mk2]) mGroups[mk2] = { acc: 0, ven: 0 };
-      for (const d of w.days) for (let li=0; li<w.locations.length; li++) { const x=d['l'+li]; if (x&&x.a) mGroups[mk2].acc += x.a; if (x&&x.v) mGroups[mk2].ven += x.v; }
-    }
-    const sortedM = Object.keys(mGroups).sort();
-    weeklyLabels = sortedM.map(k => MES[parseInt(k.split('-')[1])]);
-    weeklyAcc = sortedM.map(k => mGroups[k].acc);
-    weeklyVen = sortedM.map(k => mGroups[k].ven);
+    const mGrp = {};
+    for (const w of weeks) { const mk2 = mkKey(w.days[0]._date); if (!mGrp[mk2]) mGrp[mk2]={acc:0,ven:0}; for (const d of w.days) for (let li=0; li<w.locations.length; li++) { const x=d['l'+li]; if (x&&x.a) mGrp[mk2].acc+=x.a; if (x&&x.v) mGrp[mk2].ven+=x.v; } }
+    const sm = Object.keys(mGrp).sort();
+    wLabels = sm.map(k => MES[parseInt(k.split('-')[1])]); wAcc = sm.map(k => mGrp[k].acc); wVen = sm.map(k => mGrp[k].ven);
   }
   charts.W = new Chart(document.getElementById('chartWeekly'), {
     type: 'line',
     data: {
-      labels: weeklyLabels,
+      labels: wLabels,
       datasets: [
-        { label: 'Accesos', data: weeklyAcc, borderColor: '#2563eb', backgroundColor: '#2563eb15', fill: true, tension: .3, pointRadius: 4 },
-        { label: 'Ventas (€)', data: weeklyVen, borderColor: '#059669', backgroundColor: '#05966915', fill: true, tension: .3, pointRadius: 4, yAxisID: 'y1' }
+        { label: 'Accesos', data: wAcc, borderColor: '#2563eb', backgroundColor: '#2563eb15', fill: true, tension: .3, pointRadius: 4 },
+        { label: 'Ventas (€)', data: wVen, borderColor: '#059669', backgroundColor: '#05966915', fill: true, tension: .3, pointRadius: 4, yAxisID: 'y1' }
       ]
     },
     options: {
@@ -400,21 +472,134 @@ function render() {
       }
     }
   });
-  // Table
-  document.getElementById('tableBadge').textContent = badge;
-  let html = '<table><thead><tr><th>Localidad</th><th class="text-right">Accesos</th><th class="text-right">Ventas</th><th class="text-right">Tasa Conv.</th><th class="text-right">Unidades</th><th class="text-right">Trans.</th></tr></thead><tbody>';
+
+  // ---- Weekday analysis ----
+  renderWeekdayChart(month, isAll);
+
+  // ---- Table ----
+  renderTable(month, label, locNames, ranked, topLoc, flopLoc, totalTarget, totalVentas);
+}
+
+// ============================================================
+// WEEKDAY CHART
+// ============================================================
+function renderWeekdayChart(month, isAll) {
+  destroyChart('WD');
+  // Aggregate by day of week from allDayData
+  const dowData = {};
+  for (let d = 0; d < 7; d++) dowData[d] = { a: [], v: [], t: [] };
+
+  // If a specific month is selected, filter by that month's dates
+  if (!isAll) {
+    const monthDates = new Set();
+    for (const w of month.weeks) for (const d of w.days) monthDates.add(d._date);
+    for (const dd of allDayData) {
+      if (monthDates.has(dd._date)) continue; // skip, we need to filter differently
+    }
+    // Recompute from month data
+    for (const w of month.weeks) {
+      for (const d of w.days) {
+        const dow = dayOfWeek(d._date);
+        for (let li = 0; li < w.locations.length; li++) {
+          const x = d['l'+li]; if (!x) continue;
+          dowData[dow].a.push(x.a||0);
+          dowData[dow].v.push(x.v||0);
+          if (x.t !== null) dowData[dow].t.push(x.t);
+        }
+      }
+    }
+  } else {
+    // Use all data
+    for (const dd of allDayData) {
+      dowData[dd.dow].a.push(dd.a);
+      dowData[dd.dow].v.push(dd.v);
+      if (dd.t !== null) dowData[dd.dow].t.push(dd.t);
+    }
+  }
+
+  const labels = DIA_CORT;
+  const accAverages = [0,1,2,3,4,5,6].map(d => avg(dowData[d].a));
+  const venAverages = [0,1,2,3,4,5,6].map(d => avg(dowData[d].v));
+
+  charts.WD = new Chart(document.getElementById('chartWeekday'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Prom. Accesos', data: accAverages, backgroundColor: '#2563eb80', borderColor: '#2563eb', borderWidth: 1, borderRadius: 3 },
+        { label: 'Prom. Ventas (€)', data: venAverages, backgroundColor: '#05966980', borderColor: '#059669', borderWidth: 1, borderRadius: 3 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 14, padding: 12, usePointStyle: true } },
+        tooltip: { callbacks: { label: ctx => ctx.datasetIndex === 0 ? 'Accesos: '+fn(ctx.raw) : 'Ventas: '+fse(ctx.raw) } }
+      },
+      scales: { x: { grid: { display: false }, ticks: { font: { size: 11 } } }, y: { beginAtZero: true, grid: { color: '#f0f0f0' } } }
+    }
+  });
+}
+
+// ============================================================
+// TABLE
+// ============================================================
+function renderTable(month, label, locNames, ranked, topLoc, flopLoc, totalTarget, totalVentas) {
+  document.getElementById('tableBadge').textContent = label;
+  let html = '<table><thead><tr>'+
+    '<th>Localidad</th><th class="text-right">Accesos</th><th class="text-right">Ventas</th><th class="text-right">Objetivo</th><th class="text-right">% Obj.</th>'+
+    '<th class="text-right">Tasa Conv.</th><th class="text-right">Unidades</th><th class="text-right">Trans.</th>'+
+  '</tr></thead><tbody>';
   locNames.forEach((l, i) => {
     const d = month.locData[l];
-    html += '<tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+LOC_COLORS[i%5]+';margin-right:6px"></span>'+l+'</td>'+
-      '<td class="text-right">'+fn(d.accesos)+'</td><td class="text-right">'+fe(d.ventas)+'</td><td class="text-right">'+fp(d.tasaConv)+'</td><td class="text-right">'+fn(d.unidades)+'</td><td class="text-right">'+fn(d.transacciones)+'</td></tr>';
+    const target = getTarget(l);
+    const pctTarget = targetPct(d.ventas, target);
+    const rank = ranked.findIndex(r => r.name === l) + 1;
+    const isTop = l === topLoc;
+    const isFlop = l === flopLoc;
+    const rowClass = isTop ? 'top-row' : (isFlop ? 'flop-row' : '');
+    const badge = isTop ? '<span class="rank-badge top">🏆 TOP</span>' : (isFlop ? '<span class="rank-badge flop">⚠️ FLOP</span>' : '');
+
+    // Color the progress % 
+    const pctColor = pctTarget >= 100 ? 'var(--green)' : (pctTarget >= 75 ? 'var(--orange)' : 'var(--red)');
+
+    html += '<tr class="'+rowClass+'">'+
+      '<td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+LOC_COLORS[i%5]+';margin-right:5px"></span>'+l+' '+badge+'</td>'+
+      '<td class="text-right">'+fn(d.accesos)+'</td>'+
+      '<td class="text-right">'+fe(d.ventas)+'</td>'+
+      '<td class="text-right">'+(target ? fe(target) : '—')+'</td>'+
+      '<td class="text-right" style="color:'+pctColor+';font-weight:600">'+(target ? pctTarget.toFixed(0)+'%' : '—')+'</td>'+
+      '<td class="text-right">'+fp(d.tasaConv)+'</td>'+
+      '<td class="text-right">'+fn(d.unidades)+'</td>'+
+      '<td class="text-right">'+fn(d.transacciones)+'</td>'+
+    '</tr>';
   });
-  html += '<tr class="total-row"><td><strong>Total '+label+'</strong></td><td class="text-right"><strong>'+fn(t.accesos)+'</strong></td><td class="text-right"><strong>'+fse(t.ventas)+'</strong></td><td class="text-right"><strong>'+fp(t.tasaConv)+'</strong></td><td class="text-right"><strong>'+fn(t.unidades)+'</strong></td><td class="text-right"><strong>'+fn(t.transacciones)+'</strong></td></tr>';
+  // Total
+  const t = month.totals;
+  const overallPct = targetPct(totalVentas, totalTarget);
+  html += '<tr class="total-row">'+
+    '<td><strong>Total '+label+'</strong></td>'+
+    '<td class="text-right"><strong>'+fn(t.accesos)+'</strong></td>'+
+    '<td class="text-right"><strong>'+fse(t.ventas)+'</strong></td>'+
+    '<td class="text-right"><strong>'+(totalTarget ? fe(totalTarget) : '—')+'</strong></td>'+
+    '<td class="text-right" style="color:'+(overallPct>=100?'var(--green)':'var(--orange)')+';font-weight:700">'+(totalTarget ? overallPct.toFixed(0)+'%' : '—')+'</td>'+
+    '<td class="text-right"><strong>'+fp(t.tasaConv)+'</strong></td>'+
+    '<td class="text-right"><strong>'+fn(t.unidades)+'</strong></td>'+
+    '<td class="text-right"><strong>'+fn(t.transacciones)+'</strong></td>'+
+  '</tr>';
   html += '</tbody></table>';
   document.getElementById('monthlyTableWrap').innerHTML = html;
 }
+
+// ============================================================
+// HELPERS
+// ============================================================
 function destroyChart(k) { if (charts[k]) { charts[k].destroy(); delete charts[k]; } }
 function sel(mk) { selectedMonth = mk; render(); setTimeout(() => Object.values(charts).forEach(c => { if (c.resize) c.resize(); }), 60); }
-// ===== LOAD =====
+
+// ============================================================
+// LOAD
+// ============================================================
 async function loadData() {
   const btn = document.getElementById('refreshBtn'), loading = document.getElementById('loadingState'), content = document.getElementById('dashboardContent');
   btn.classList.add('loading'); btn.disabled = true;
@@ -424,8 +609,7 @@ async function loadData() {
   try {
     const r = await fetch(CSV_URL, { cache: 'no-store' });
     if (!r.ok) throw new Error('HTTP '+r.status);
-    const text = await r.text();
-    weekData = parseData(parseCSV(text));
+    weekData = parseData(parseCSV(await r.text()));
     if (!weekData.length) throw new Error('No se pudieron extraer datos.');
     months = buildMonths(weekData);
     monthKeys = Object.keys(months).filter(k => k !== '_all').sort();
