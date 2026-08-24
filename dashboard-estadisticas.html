@@ -87,7 +87,7 @@ tbody tr.flop-row{background:#fef2f2!important}
   <div class="header">
     <div class="header-left">
       <h1>Executive Dashboard</h1>
-      <div class="sub">Accesos · Ventas · Conversión · Unidades · Transacciones</div>
+      <div class="sub">Accesos · Ventas · €/Acceso · Unidades · Transacciones</div>
     </div>
     <div class="header-right">
       <span id="lastUpdate">—</span>
@@ -108,7 +108,7 @@ tbody tr.flop-row{background:#fef2f2!important}
     <div class="chart-grid">
       <div class="chart-card"><h3>Evolución Mensual <span class="badge">Total</span></h3><div class="chart-wrap tall"><canvas id="chartMonthly"></canvas></div></div>
       <div class="chart-card"><h3>Por Localidad <span class="badge" id="locBadge">—</span></h3><div class="chart-wrap"><canvas id="chartLoc"></canvas></div></div>
-      <div class="chart-card"><h3>Conversión por Localidad <span class="badge" id="convBadge">—</span></h3><div class="chart-wrap"><canvas id="chartConv"></canvas></div></div>
+      <div class="chart-card"><h3>Ventas por Acceso <span class="badge" id="convBadge">—</span></h3><div class="chart-wrap"><canvas id="chartConv"></canvas></div></div>
       <div class="chart-card"><h3>Tendencia por Semana <span class="badge" id="weeklyBadge">—</span></h3><div class="chart-wrap"><canvas id="chartWeekly"></canvas></div></div>
       <div class="chart-card"><h3>Promedio por Día de Semana <span class="badge green">Rendimiento</span></h3><div class="chart-wrap"><canvas id="chartWeekday"></canvas></div></div>
     </div>
@@ -122,8 +122,9 @@ tbody tr.flop-row{background:#fef2f2!important}
 // ============================================================
 // CONFIG
 // ============================================================
-const CSV_URL = '/api/csv';
-const LOC_COLORS = ['#2563eb','#059669','#d97706','#7c3aed','#dc2626'];
+const APP_URL = 'https://dashboard-estadisticas.onrender.com';
+const CSV_URL = (window.location.protocol === 'file:' ? APP_URL : '') + '/api/csv';
+const LOC_COLORS = ['#2563eb','#059669','#d97706','#7c3aed','#dc2626','#0891b2','#db2777'];
 const LOC_NAMES = ['ESTAFETA 41 (Toros)','ESTAFETA 76','ZARAGOZA','DONOSTI','BILBAO'];
 const MES = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const DIA = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
@@ -167,7 +168,7 @@ function parseCSV(text) {
 }
 function num(s) {
   if (!s||s===''||s==='#DIV/0!'||s==='#REF!'||s==='#N/A') return null;
-  let n = String(s).trim().replace('€','').replace('$','').trim().replace(/\./g,'').replace(',','.');
+  let n = String(s).trim().replace('€','').replace('$','').trim().replace(/\./g,'').replace(/,+/g,',').replace(',','.');
   const v = parseFloat(n); return isNaN(v) ? null : v;
 }
 function parseData(rows) {
@@ -241,7 +242,7 @@ function buildMonths(weeks) {
     for (const w of m.weeks) {
       for (const li in w.locations) {
         const ln = w.locations[li];
-        if (!locA[ln]) { locA[ln]=0; locV[ln]=0; locC[ln]=[]; locU[ln]=0; locT[ln]=0; }
+        if (!(ln in locA)) { locA[ln]=0; locV[ln]=0; locC[ln]=[]; locU[ln]=0; locT[ln]=0; }
         for (const d of w.days) {
           const x = d['l'+li]; if (!x) continue;
           if (x.a) { m.totals.accesos += x.a; locA[ln] += x.a; }
@@ -252,11 +253,11 @@ function buildMonths(weeks) {
         }
       }
     }
-    m.totals.tasaConv = m.totals.conv.length ? m.totals.conv.reduce((a,b)=>a+b,0)/m.totals.conv.length : null;
+    m.totals.tasaConv = m.totals.accesos ? m.totals.ventas/m.totals.accesos : null;
     m.locData = {};
     for (const ln of Object.keys(locA)) m.locData[ln] = {
       accesos: locA[ln], ventas: locV[ln],
-      tasaConv: locC[ln].length ? locC[ln].reduce((a,b)=>a+b,0)/locC[ln].length : null,
+      tasaConv: locA[ln] ? locV[ln]/locA[ln] : null,
       unidades: locU[ln], transacciones: locT[ln]
     };
   }
@@ -267,7 +268,7 @@ function buildMonths(weeks) {
   for (const w of weeks) {
     for (const li in w.locations) {
       const ln = w.locations[li];
-      if (!allA[ln]) { allA[ln]=0; allV[ln]=0; allC[ln]=[]; allU[ln]=0; allT[ln]=0; }
+      if (!(ln in allA)) { allA[ln]=0; allV[ln]=0; allC[ln]=[]; allU[ln]=0; allT[ln]=0; }
       for (const d of w.days) {
         const x = d['l'+li]; if (!x) continue;
         if (x.a) { allTot.accesos += x.a; allA[ln] += x.a; }
@@ -281,14 +282,14 @@ function buildMonths(weeks) {
   const allLoc = {};
   for (const ln of Object.keys(allA)) allLoc[ln] = {
     accesos: allA[ln], ventas: allV[ln],
-    tasaConv: allC[ln].length ? allC[ln].reduce((a,b)=>a+b,0)/allC[ln].length : null,
+    tasaConv: allA[ln] ? allV[ln]/allA[ln] : null,
     unidades: allU[ln], transacciones: allT[ln]
   };
   const result = {};
   for (const k of keys) result[k] = mMap[k];
   result._all = {
     label: '📊 Acumulado Total', weeks: weeks,
-    totals: { ...allTot, tasaConv: allTot.conv.length ? allTot.conv.reduce((a,b)=>a+b,0)/allTot.conv.length : null },
+    totals: { ...allTot, tasaConv: allTot.accesos ? allTot.ventas/allTot.accesos : null },
     locData: allLoc
   };
   return result;
@@ -308,7 +309,7 @@ const sum = (arr) => arr.reduce((a,b)=>a+(b||0),0);
 const avg = (arr) => { const v = arr.filter(x => x !== null && !isNaN(x)); return v.length ? sum(v)/v.length : 0; };
 
 function getTarget(locName) {
-  for (const [k, v] of Object.entries(TARGETS)) if (locName.toUpperCase().includes(k)) return v;
+  for (const [k, v] of Object.entries(TARGETS)) if (locName.toUpperCase().includes(k.toUpperCase())) return v;
   return null;
 }
 
@@ -371,7 +372,7 @@ function render() {
     '<div class="kpi-card" style="border-left:4px solid var(--green)"><div class="kpi-label">Ventas <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fse(t.ventas)+'</div><div class="kpi-sub">'+subVen+'</div>'+
       '<div class="progress-bar"><div class="fill" style="width:'+targetPr.toFixed(0)+'%;background:'+(targetPr>=100?'var(--green)':'var(--primary)')+'"></div></div>'+
       '<div class="progress-label"><span>'+targetPr.toFixed(0)+'% del objetivo</span><span>'+fse(totalTarget)+'</span></div></div>'+
-    '<div class="kpi-card" style="border-left:4px solid var(--orange)"><div class="kpi-label">Tasa Conversión <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fp(t.tasaConv)+'</div><div class="kpi-sub">'+subCnv+'</div></div>'+
+    '<div class="kpi-card" style="border-left:4px solid var(--orange)"><div class="kpi-label">Ventas por Acceso <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fe(t.tasaConv)+'</div><div class="kpi-sub">'+subCnv+'</div></div>'+
     '<div class="kpi-card" style="border-left:4px solid var(--purple)"><div class="kpi-label">Unidades <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fn(t.unidades)+'</div><div class="kpi-sub">'+subUni+'</div></div>'+
     '<div class="kpi-card" style="border-left:4px solid var(--red)"><div class="kpi-label">Transacciones <span class="kpi-period-tag">'+label+'</span></div><div class="kpi-value">'+fn(t.transacciones)+'</div><div class="kpi-sub">'+subTra+'</div></div>';
 
@@ -403,12 +404,12 @@ function render() {
   const locBGs = locNames.map(l => {
     if (l === topLoc) return '#05966999';
     if (l === flopLoc) return '#dc262699';
-    return LOC_COLORS[locNames.indexOf(l)%5]+'99';
+    return LOC_COLORS[locNames.indexOf(l)%LOC_COLORS.length]+'99';
   });
   const locBDs = locNames.map(l => {
     if (l === topLoc) return '#059669';
     if (l === flopLoc) return '#dc2626';
-    return LOC_COLORS[locNames.indexOf(l)%5];
+    return LOC_COLORS[locNames.indexOf(l)%LOC_COLORS.length];
   });
   charts.L = new Chart(document.getElementById('chartLoc'), {
     type: 'bar',
@@ -421,7 +422,7 @@ function render() {
       }),
       datasets: [
         { label: 'Accesos', data: locAcc, backgroundColor: locBGs, borderColor: locBDs, borderWidth: locNames.map(l => l===topLoc||l===flopLoc ? 2 : 1), borderRadius: 3 },
-        { label: 'Ventas (€)', data: locVen, backgroundColor: locNames.map((_,i) => LOC_COLORS[(i+1)%5]+'99'), borderColor: locNames.map((_,i) => LOC_COLORS[(i+1)%5]), borderWidth: 1, borderRadius: 3 }
+        { label: 'Ventas (€)', data: locVen, backgroundColor: locNames.map((_,i) => LOC_COLORS[(i+1)%LOC_COLORS.length]+'99'), borderColor: locNames.map((_,i) => LOC_COLORS[(i+1)%LOC_COLORS.length]), borderWidth: 1, borderRadius: 3 }
       ]
     },
     options: {
@@ -443,12 +444,12 @@ function render() {
         else if (l === flopLoc) suffix = ' ⚠️';
         return l + suffix;
       }),
-      datasets: [{ label: 'Tasa Conversión', data: locNames.map(l => month.locData[l].tasaConv), backgroundColor: locBGs, borderColor: locBDs, borderWidth: locNames.map(l => l===topLoc||l===flopLoc ? 2 : 1), borderRadius: 3 }]
+      datasets: [{ label: 'Ventas por Acceso (€)', data: locNames.map(l => month.locData[l].tasaConv), backgroundColor: locBGs, borderColor: locBDs, borderWidth: locNames.map(l => l===topLoc||l===flopLoc ? 2 : 1), borderRadius: 3 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false, indexAxis: 'y',
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => 'Tasa: '+fp(ctx.raw) } } },
-      scales: { x: { beginAtZero: true, grid: { color: '#f0f0f0' }, ticks: { callback: v => v+'%' } }, y: { grid: { display: false }, ticks: { font: { size: 11 } } } }
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => 'Ventas por Acceso: '+fe(ctx.raw) } } },
+      scales: { x: { beginAtZero: true, grid: { color: '#f0f0f0' }, ticks: { callback: v => fe(v) } }, y: { grid: { display: false }, ticks: { font: { size: 11 } } } }
     }
   });
 
@@ -552,7 +553,7 @@ function renderTable(month, label, locNames, ranked, topLoc, flopLoc, totalTarge
   document.getElementById('tableBadge').textContent = label;
   let html = '<table><thead><tr>'+
     '<th>Localidad</th><th class="text-right">Accesos</th><th class="text-right">Ventas</th><th class="text-right">Objetivo</th><th class="text-right">% Obj.</th>'+
-    '<th class="text-right">Tasa Conv.</th><th class="text-right">Unidades</th><th class="text-right">Trans.</th>'+
+    '<th class="text-right">€/Acceso</th><th class="text-right">Unidades</th><th class="text-right">Trans.</th>'+
   '</tr></thead><tbody>';
   locNames.forEach((l, i) => {
     const d = month.locData[l];
@@ -568,12 +569,12 @@ function renderTable(month, label, locNames, ranked, topLoc, flopLoc, totalTarge
     const pctColor = pctTarget >= 100 ? 'var(--green)' : (pctTarget >= 75 ? 'var(--orange)' : 'var(--red)');
 
     html += '<tr class="'+rowClass+'">'+
-      '<td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+LOC_COLORS[i%5]+';margin-right:5px"></span>'+l+' '+badge+'</td>'+
+      '<td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+LOC_COLORS[i%LOC_COLORS.length]+';margin-right:5px"></span>'+l+' '+badge+'</td>'+
       '<td class="text-right">'+fn(d.accesos)+'</td>'+
       '<td class="text-right">'+fe(d.ventas)+'</td>'+
       '<td class="text-right">'+(target ? fe(target) : '—')+'</td>'+
       '<td class="text-right" style="color:'+pctColor+';font-weight:600">'+(target ? pctTarget.toFixed(0)+'%' : '—')+'</td>'+
-      '<td class="text-right">'+fp(d.tasaConv)+'</td>'+
+      '<td class="text-right">'+fe(d.tasaConv)+'</td>'+
       '<td class="text-right">'+fn(d.unidades)+'</td>'+
       '<td class="text-right">'+fn(d.transacciones)+'</td>'+
     '</tr>';
@@ -587,7 +588,7 @@ function renderTable(month, label, locNames, ranked, topLoc, flopLoc, totalTarge
     '<td class="text-right"><strong>'+fse(t.ventas)+'</strong></td>'+
     '<td class="text-right"><strong>'+(totalTarget ? fe(totalTarget) : '—')+'</strong></td>'+
     '<td class="text-right" style="color:'+(overallPct>=100?'var(--green)':'var(--orange)')+';font-weight:700">'+(totalTarget ? overallPct.toFixed(0)+'%' : '—')+'</td>'+
-    '<td class="text-right"><strong>'+fp(t.tasaConv)+'</strong></td>'+
+    '<td class="text-right"><strong>'+fe(t.tasaConv)+'</strong></td>'+
     '<td class="text-right"><strong>'+fn(t.unidades)+'</strong></td>'+
     '<td class="text-right"><strong>'+fn(t.transacciones)+'</strong></td>'+
   '</tr>';
