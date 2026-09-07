@@ -222,9 +222,15 @@ function buildMonths(weeks) {
 
   for (const w of weeks) {
     if (!w.days.length) continue;
-    const mk = mkKey(w.days[0]._date);
-    if (!mMap[mk]) mMap[mk] = { label: mkLabel(mk), weeks: [], totals: {accesos:0,ventas:0,conv:[],unidades:0,transacciones:0}, locData: {} };
-    mMap[mk].weeks.push(w);
+    // Una semana puede cruzar el cambio de mes (p.ej. 31 ago - 6 sep): hay que
+    // registrarla en TODOS los meses a los que pertenecen sus dias, no solo en
+    // el mes del primer dia (ese era el bug: dias de septiembre se contaban
+    // como agosto y septiembre nunca llegaba a aparecer).
+    const touchedMonths = new Set(w.days.map(d => mkKey(d._date)));
+    for (const mk of touchedMonths) {
+      if (!mMap[mk]) mMap[mk] = { label: mkLabel(mk), weeks: [], totals: {accesos:0,ventas:0,conv:[],unidades:0,transacciones:0}, locData: {} };
+      mMap[mk].weeks.push(w);
+    }
 
     for (const d of w.days) {
       const dow = dayOfWeek(d._date);
@@ -244,6 +250,7 @@ function buildMonths(weeks) {
         const ln = w.locations[li];
         if (!(ln in locA)) { locA[ln]=0; locV[ln]=0; locC[ln]=[]; locU[ln]=0; locT[ln]=0; }
         for (const d of w.days) {
+          if (mkKey(d._date) !== k) continue; // solo el dia que realmente pertenece a este mes
           const x = d['l'+li]; if (!x) continue;
           if (x.a) { m.totals.accesos += x.a; locA[ln] += x.a; }
           if (x.v) { m.totals.ventas += x.v; locV[ln] += x.v; }
@@ -462,7 +469,7 @@ function render() {
   let wVen = weeks.map(w => { let s=0; for (const d of w.days) for (let li=0; li<w.locations.length; li++) { const x=d['l'+li]; if (x&&x.v) s+=x.v; } return s; });
   if (isAll && weeks.length > 15) {
     const mGrp = {};
-    for (const w of weeks) { const mk2 = mkKey(w.days[0]._date); if (!mGrp[mk2]) mGrp[mk2]={acc:0,ven:0}; for (const d of w.days) for (let li=0; li<w.locations.length; li++) { const x=d['l'+li]; if (x&&x.a) mGrp[mk2].acc+=x.a; if (x&&x.v) mGrp[mk2].ven+=x.v; } }
+    for (const w of weeks) { for (const d of w.days) { const mk2 = mkKey(d._date); if (!mGrp[mk2]) mGrp[mk2]={acc:0,ven:0}; for (let li=0; li<w.locations.length; li++) { const x=d['l'+li]; if (x&&x.a) mGrp[mk2].acc+=x.a; if (x&&x.v) mGrp[mk2].ven+=x.v; } } }
     const sm = Object.keys(mGrp).sort();
     wLabels = sm.map(k => MES[parseInt(k.split('-')[1])]); wAcc = sm.map(k => mGrp[k].acc); wVen = sm.map(k => mGrp[k].ven);
   }
