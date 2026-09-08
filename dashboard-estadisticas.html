@@ -231,6 +231,15 @@ function buildMonths(weeks) {
       if (!mMap[mk]) mMap[mk] = { label: mkLabel(mk), weeks: [], totals: {accesos:0,ventas:0,conv:[],unidades:0,transacciones:0}, locData: {} };
       mMap[mk].weeks.push(w);
     }
+    // Unidades y Transacciones solo se registran UNA VEZ por semana (no a diario,
+    // el resto de dias se dejan en blanco en el Sheet). Por eso, para esas dos
+    // metricas concretas, la semana entera se atribuye al mes donde caen mas
+    // dias de esa semana (mayoria) en vez de repartirla dia a dia como Accesos/Ventas.
+    const countByMonth = {};
+    for (const d of w.days) { const dmk = mkKey(d._date); countByMonth[dmk] = (countByMonth[dmk] || 0) + 1; }
+    let primaryMonth = null, bestCount = -1;
+    for (const dmk in countByMonth) if (countByMonth[dmk] > bestCount) { bestCount = countByMonth[dmk]; primaryMonth = dmk; }
+    w._primaryMonth = primaryMonth;
 
     for (const d of w.days) {
       const dow = dayOfWeek(d._date);
@@ -255,8 +264,16 @@ function buildMonths(weeks) {
           if (x.a) { m.totals.accesos += x.a; locA[ln] += x.a; }
           if (x.v) { m.totals.ventas += x.v; locV[ln] += x.v; }
           if (x.t !== null) { m.totals.conv.push(x.t); locC[ln].push(x.t); }
-          if (x.u) { m.totals.unidades += x.u; locU[ln] += x.u; }
-          if (x.r) { m.totals.transacciones += x.r; locT[ln] += x.r; }
+        }
+        // Unidades/Transacciones: una vez por semana, solo si este mes es el
+        // mes mayoritario de la semana (evita que salgan a 0 en el mes con
+        // menos dias, y evita contarlas dos veces si se repartiera por dia).
+        if (w._primaryMonth === k) {
+          for (const d of w.days) {
+            const x = d['l'+li]; if (!x) continue;
+            if (x.u) { m.totals.unidades += x.u; locU[ln] += x.u; }
+            if (x.r) { m.totals.transacciones += x.r; locT[ln] += x.r; }
+          }
         }
       }
     }
